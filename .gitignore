@@ -3,3 +3,8 @@ node_modules/
 dist/
 .DS_Store
 *.log
+
+Front-End/src/football_quiz_100_questions.json
+Front-End/node_modules/
+Front-End/dist/
+Front-End/package-lock.json

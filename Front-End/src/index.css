@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Football IQ Design System - Premium Sports Brand */
+    --background: 120 25% 22%; /* #386641 - Deep green base */
+    --foreground: 0 0% 100%; /* Pure white text */
+
+    --card: 120 25% 22%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 120 25% 22%;
+    --popover-foreground: 0 0% 100%;
+
+    /* Brand Colors */
+    --primary: 25 100% 49%; /* #F97A00 - Orange primary */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 25 100% 60%; /* Lighter orange for glow */
+
+    --secondary: 60 78% 70%; /* #FED16A - Soft yellow */
+    --secondary-foreground: 120 25% 22%;
+
+    --success: 85 54% 51%; /* #78C841 - Vibrant green */
+    --success-foreground: 0 0% 100%;
+
+    --destructive: 0 83% 61%; /* #FB4141 - Red for wrong answers */
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 60 100% 97%; /* #FFF4A4 - Soft yellow background */
+    --warning-foreground: 120 25% 22%;
+
+    --bright: 48 100% 88%; /* Bright yellow text */
+    --accent-bright: 27 100% 70%; /* Bright orange accent */
+
+    --muted: 120 20% 30%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 25 100% 49%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 120 20% 40%;
+    --input: 120 20% 30%;
+    --ring: 25 100% 60%;
+
+    --radius: 1rem; /* More rounded for modern feel */
+
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--background)), hsl(25 100% 49% / 0.8));
+    --gradient-card: linear-gradient(135deg, hsl(var(--background)), hsl(25 100% 49% / 0.2));
+    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(var(--success)) 100%);
+    
+    /* Shadows & Glows */
+    --shadow-glow: 0 0 30px hsl(var(--primary) / 0.3);
+    --shadow-success-glow: 0 0 30px hsl(var(--success) / 0.4);
+    --shadow-destructive-glow: 0 0 30px hsl(var(--destructive) / 0.4);
+    --shadow-premium: 0 20px 40px -12px hsl(0 0% 0% / 0.4);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  /* Dark mode already applied as base theme */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-montserrat;
+    background: linear-gradient(135deg, hsl(var(--background)), hsl(25 100% 49% / 0.1));
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  /* Glow effects */
+  .glow-primary {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .glow-success {
+    box-shadow: var(--shadow-success-glow);
+  }
+  
+  .glow-destructive {
+    box-shadow: var(--shadow-destructive-glow);
+  }
+
+  /* Premium card styles */
+  .card-premium {
+    @apply bg-card/90 backdrop-blur-sm rounded-2xl shadow-xl border border-border/50;
+    box-shadow: var(--shadow-premium);
+  }
+
+  /* Text glow animation */
+  .text-glow {
+    text-shadow: 0 0 20px hsl(var(--primary) / 0.6);
+  }
+
+  /* Typing animation */
+  .typing-animation {
+    border-right: 3px solid hsl(var(--primary));
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 50% { border-color: hsl(var(--primary)); }
+    51%, 100% { border-color: transparent; }
+  }
+
+  /* Pulse animation for buttons */
+  .pulse-slow {
+    animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: .8;
+    }
+  }
+
+  /* Bounce animation for correct answers */
+  .bounce-in {
+    animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  @keyframes bounce-in {
+    0% {
+      transform: scale(0.3);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+}
