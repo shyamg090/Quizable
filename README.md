@@ -1,4 +1,4 @@
-# Football-iq-temporal
+# Quizable-temporal
 
 A containerized Temporal workflow orchestration setup with PostgreSQL database and web UI for building distributed applications.
 
