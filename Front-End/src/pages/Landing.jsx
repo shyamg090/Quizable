@@ -84,23 +84,24 @@ const Landing = () => {
   return (
     <div className="h-screen bg-gradient-hero flex flex-col px-4 py-4 overflow-hidden">
       <div className="max-w-6xl w-full mx-auto flex flex-col h-full">
-        {/* Header with Back Button and Title */}
-        <div className="flex justify-between items-center mb-4">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
+        {/* back button */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Button
+            variant="outline"
+            onClick={handleBackToTopics}
+            className="group text-bright hover:text-accent-bright transition-all duration-300 rounded-xl px-4 py-2 font-semibold hover:scale-105 bg-transparent hover:bg-transparent cursor-pointer border-0"
           >
-            <Button
-              variant="outline"
-              onClick={handleBackToTopics}
-              className="group text-bright hover:text-accent-bright transition-all duration-300 rounded-xl px-4 py-2 font-semibold hover:scale-105 bg-transparent hover:bg-transparent cursor-pointer border-0"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:-translate-x-1" />
-              Back to Topics
-            </Button>
-          </motion.div>
+            <ArrowLeft className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:-translate-x-1" />
+            Back to Topics
+          </Button>
+        </motion.div>
 
+        {/* apple inspiration typing effect */}
+        <div className="flex justify-center items-center mb-4">
           <motion.div
             className="text-center"
             initial={{ opacity: 0, y: -20 }}
@@ -110,13 +111,12 @@ const Landing = () => {
             <TypingHello />
           </motion.div>
 
-          <div className="w-32"></div> {/* Spacer for centering */}
         </div>
 
         {/* Main Content Container */}
         <div className="flex-1 flex items-center justify-center min-h-0">
           <div className="grid lg:grid-cols-2 gap-8 w-full items-center">
-            
+
             {/* Left Side - Game Info & Features */}
             <motion.div
               className="space-y-4"
@@ -179,13 +179,13 @@ const Landing = () => {
               {/* Name Input Section */}
               <div className="space-y-4 text-center">
                 <h2 className="text-2xl font-bold text-accent-bright mb-4">Ready to Start?</h2>
-                
+
                 <Input
                   type="text"
                   placeholder={theme.placeholders.nameInput}
                   value={playerName}
                   onChange={(e) => setPlayerName(e.target.value)}
-                  className="h-12 text-lg bg-background/50 border-2 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl"
+                  className="h-12 text-lg bg-background/50 border-2 focus:border-0 border-primary/30 focus:border-primary rounded-xl"
                   onKeyPress={(e) => e.key === 'Enter' && handleStartGame()}
                 />
 
