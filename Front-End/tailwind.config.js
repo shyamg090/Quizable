@@ -12,7 +12,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        montserrat: ['Montserrat', 'sans-serif'],
+        montserrat: ['"Kode Mono"', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",

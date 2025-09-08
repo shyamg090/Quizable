@@ -99,9 +99,9 @@ const TopicSelection = () => {
     // Navigate to the main landing page
     navigate('/landing');
   };
-
+// from-slate-900 via-slate-800 to-slate-900 //from-orange-700 via-amber-800 to-slate-900 // from-amber-700 via-orange-600 to-amber-700
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-pink-900 via-amber-900 to-orange-900 flex items-center justify-center px-4 py-8">
       <div className="max-w-6xl w-full">
         {/* Header */}
         <div className="text-center mb-12">
@@ -117,7 +117,7 @@ const TopicSelection = () => {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="text-6xl md:text-7xl font-extrabold text-purple-800 drop-shadow-md"
+                className="text-9xl md:text-7xl font-extrabold text-orange-100 drop-shadow-md"
               >
                 Quizable
               </motion.h1>
