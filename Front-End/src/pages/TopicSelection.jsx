@@ -112,27 +112,18 @@ const TopicSelection = () => {
             className="relative"
           >
             {/* Background Glow Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-3xl rounded-full transform scale-150" />
-
-            <div className="relative z-10">
-              <h1 className="text-6xl md:text-7xl font-black mb-6">
-                <span className="text-white drop-shadow-2xl">Quiz </span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 animate-pulse">
-                  Arena
-                </span>
-              </h1>
-
-              <div className="inline-block px-6 py-3 bg-gradient-to-r from-orange-500/20 to-purple-600/20 backdrop-blur-sm border border-white/20 rounded-full mb-4">
-                <p className="text-xl md:text-2xl text-orange-200 font-bold tracking-wide">
-                  🎯 Choose Your Challenge
-                </p>
-              </div>
-
-              <div className="flex justify-center items-center gap-2 mt-4">
-                <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
-                <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-              </div>
+            <div className="text-center mb-12">
+              <motion.h1
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="text-6xl md:text-7xl font-extrabold text-purple-800 drop-shadow-md"
+              >
+                Quizable
+              </motion.h1>
+              <p className="mt-4 text-xl md:text-2xl text-white font-semibold bg-purple-600 px-6 py-2 inline-block rounded-full shadow-md">
+                🎯 Choose Your Challenge
+              </p>
             </div>
           </motion.div>
         </div>

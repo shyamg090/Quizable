@@ -71,7 +71,7 @@ const TypingHello = () => {
 
   return (
     <motion.h1 
-      className="text-5xl md:text-7xl lg:text-8xl font-black text-center mb-8 text-glow"
+      className="text-2xl md:text-3xl lg:text-8xl font-black text-center mt-4 text-glow"
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}

@@ -94,7 +94,7 @@ const Landing = () => {
             <Button
               variant="outline"
               onClick={handleBackToTopics}
-              className="group bg-background/20 backdrop-blur-sm hover:bg-primary/10 text-bright hover:text-accent-bright transition-all duration-300 rounded-xl px-4 py-2 font-semibold shadow-lg hover:shadow-xl hover:scale-105 cursor-pointer border-0"
+              className="group text-bright hover:text-accent-bright transition-all duration-300 rounded-xl px-4 py-2 font-semibold hover:scale-105 bg-transparent hover:bg-transparent cursor-pointer border-0"
             >
               <ArrowLeft className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:-translate-x-1" />
               Back to Topics
