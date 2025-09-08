@@ -1,10 +1,27 @@
+# Environment variables
 .env
+
+# Dependencies
 node_modules/
+
+# Build outputs
 dist/
+
+# OS generated files
 .DS_Store
+
+# Log files
 *.log
 
-Front-End/src/football_quiz_100_questions.json
-Front-End/node_modules/
-Front-End/dist/
-Front-End/package-lock.json
+# Specific data file to ignore
+quizable-Front-End/src/data/football_quiz_100_questions.json
+
+# IDE files (optional)
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
