@@ -15,6 +15,10 @@ dist/
 
 # Specific data file to ignore
 quizable-Front-End/src/data/football_quiz_100_questions.json
+quizable-Front-End/.env
+quizable-Back-End/.env
+quizable-Back-End/data/
+
 
 # IDE files (optional)
 .vscode/

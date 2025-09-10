@@ -1,14 +1,34 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { topics } from '../data/topics';
+import axios from "axios";
+import v7 from 'uuid';
 
 function ThemeOptions() {
     const navigate = useNavigate();
 
+    useEffect(async () => {
+        const token = await axios.get('http://localhost:3000/api/token'); // Updated to send unique_id directly
+        localStorage.setItem("access_token", token.data.access_token);
+    }, [])
+
     localStorage.setItem('selectedTopic', null);
-    const handleTopicSelect = (selectedTopic) => {
-        console.log("Selected Topic:", selectedTopic);
+    const handleTopicSelect = async (selectedTopic) => {
+        
         localStorage.setItem('selectedTopic', selectedTopic?.id);
+        const accessToken = localStorage.getItem("access_token");
+
+        const startQuiz = await axios.post(
+            `http://localhost:3000/api/start`,
+            {
+                topic: selectedTopic?.id
+            }, // request body (empty in your case)
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            }
+        );
         navigate('/landing');
     };
 
