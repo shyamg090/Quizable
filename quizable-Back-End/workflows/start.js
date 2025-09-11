@@ -3,7 +3,7 @@ import { defineSignal, defineQuery, setHandler, proxyActivities } from '@tempora
 export const answer = defineSignal('answer');
 export const addData = defineSignal('addData');
 
-export const getanswerQuery = defineQuery('getAnswer');
+// export const getanswerQuery = defineQuery('getAnswer');
 export const getChatquery = defineQuery('getChat');
 export const getChatHistoryQuery = defineQuery('getChatHistory');
 export const getCurrentQuestionQuery = defineQuery('getCurrentQuestion');
@@ -125,5 +125,7 @@ export async function startGameWorkflow(topic) {
     setHandler(getChatHistoryQuery, () => questionsHistory);
     setHandler(getChatquery, () => currentQuestion);
 
-    await new Promise(() => { }); // keep alive important 
+    if (quizCompleted) {
+        await new Promise(() => { }); // keep alive important
+    }
 }

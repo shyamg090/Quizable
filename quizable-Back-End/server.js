@@ -79,7 +79,6 @@ app.post("/answers/:workflowId", auth, async (req, res) => {
         // Get the updated state
         const currentQuestion = await getHandle.query("getCurrentQuestion");
         const quizStatus = await getHandle.query("getQuizStatus");
-        const chatHistory = await getHandle.query("getChatHistory");
 
         console.log('User answered:', answer, 'for question:', questionId);
         console.log('Quiz status:', quizStatus);
@@ -88,7 +87,6 @@ app.post("/answers/:workflowId", auth, async (req, res) => {
             message: "Answer processed",
             currentQuestion,
             quizStatus,
-            chatHistory,
             workflowId: workflowId
         });
     } catch (error) {
