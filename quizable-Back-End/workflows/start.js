@@ -1,6 +1,4 @@
 import { defineSignal, defineQuery, setHandler, proxyActivities } from '@temporalio/workflow';
-import * as fs from 'fs';
-import * as path from 'path';
 
 export const answer = defineSignal('answer');
 export const addData = defineSignal('addData');
@@ -18,13 +16,13 @@ const { checkAnswer, loadQuestions } = proxyActivities({
 export async function startGameWorkflow(topic) {
     // Load questions for the specified topic
     const questions = await loadQuestions(topic);
-    
+
     let currentQuestionIndex = 0;
     let questionsHistory = [];
     let score = 0;
     let quizCompleted = false;
     let currentQuestion = null;
-    
+
     // Fisher-Yates shuffle algorithm for proper randomization
     function shuffleArray(array) {
         const shuffled = [...array]; // Create a copy to avoid mutating original
@@ -34,13 +32,13 @@ export async function startGameWorkflow(topic) {
         }
         return shuffled;
     }
-    
+
     // Select 10 random questions from the topic using proper shuffle
     const shuffledQuestions = shuffleArray(questions).slice(0, 10);
-    
+
     // Set the first question
     currentQuestion = shuffledQuestions[currentQuestionIndex];
-    
+
     // Add initial question to history
     questionsHistory.push({
         questionNumber: 1,
@@ -51,17 +49,17 @@ export async function startGameWorkflow(topic) {
     // Handler for answer signal
     setHandler(answer, async (data) => {
         if (quizCompleted) return;
-        
+
         const userAnswer = data.answer;
         const questionId = data.questionId;
-        
+
         // Validate the answer
         const isCorrect = await checkAnswer(currentQuestion, userAnswer);
-        
+
         if (isCorrect) {
             score++;
         }
-        
+
         // Add user's answer to history
         questionsHistory.push({
             questionNumber: currentQuestionIndex + 1,
@@ -70,15 +68,15 @@ export async function startGameWorkflow(topic) {
             isCorrect: isCorrect,
             timestamp: new Date().toISOString()
         });
-        
+
         // Move to next question
         currentQuestionIndex++;
-        
+
         if (currentQuestionIndex >= 10) {
             // Quiz completed
             quizCompleted = true;
             currentQuestion = null;
-            
+
             questionsHistory.push({
                 type: 'quiz_completed',
                 finalScore: score,
@@ -89,7 +87,7 @@ export async function startGameWorkflow(topic) {
         } else {
             // Set next question
             currentQuestion = shuffledQuestions[currentQuestionIndex];
-            
+
             questionsHistory.push({
                 questionNumber: currentQuestionIndex + 1,
                 question: currentQuestion,
@@ -115,7 +113,7 @@ export async function startGameWorkflow(topic) {
             question: currentQuestion
         };
     });
-    
+
     setHandler(getQuizStatusQuery, () => ({
         currentQuestionNumber: currentQuestionIndex + 1,
         totalQuestions: 10,
@@ -123,7 +121,7 @@ export async function startGameWorkflow(topic) {
         completed: quizCompleted,
         topic: topic
     }));
-    
+
     setHandler(getChatHistoryQuery, () => questionsHistory);
     setHandler(getChatquery, () => currentQuestion);
 
