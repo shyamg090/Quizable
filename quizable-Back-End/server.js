@@ -97,4 +97,20 @@ app.get("/history/:workflowId", auth, async (req, res) => {
     }
 });
 
+// End workflow gracefully
+app.post("/workflow/end/:workflowId", auth, async (req, res) => {
+    try {
+        const { workflowId } = req.params;
+        const handle = client.workflow.getHandle(workflowId);
+
+        // Send graceful shutdown signal instead of terminating
+        await handle.signal("endQuiz");
+
+        res.status(200).json({ message: "Quiz ended gracefully" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to end workflow" });
+    }
+});
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

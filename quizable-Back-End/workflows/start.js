@@ -1,6 +1,7 @@
 import { defineSignal, defineQuery, setHandler, proxyActivities } from '@temporalio/workflow';
 
 export const answer = defineSignal('answer');
+export const endQuizSignal = defineSignal('endQuiz'); // New graceful shutdown signal
 
 export const getCurrentQuestionQuery = defineQuery('getCurrentQuestion');
 export const getQuizStatusQuery = defineQuery('getQuizStatus');
@@ -14,6 +15,7 @@ export async function startGameWorkflow(topic) {
     let history = [];
     let score = 0;
     let completed = false;
+    let shouldEnd = false; // Flag for graceful shutdown
 
     const shuffled = questions.sort(() => 0.5 - Math.random()).slice(0, 10);
     let currentQuestion = shuffled[currentIndex];
@@ -72,6 +74,23 @@ export async function startGameWorkflow(topic) {
         }
     });
 
+    // Add handler for graceful shutdown
+    setHandler(endQuizSignal, () => {
+        shouldEnd = true;
+        completed = true;
+        
+        // Add end marker to history
+        history.push({
+            answer: {
+                type: 'quiz_ended_by_user',
+                finalScore: score,
+                questionsCompleted: currentIndex,
+                totalQuestions: shuffled.length,
+                timestamp: new Date().toISOString(),
+            }
+        });
+    });
+
     setHandler(getCurrentQuestionQuery, () => {
         if (completed) {
             return {
@@ -99,6 +118,10 @@ export async function startGameWorkflow(topic) {
         history
     }));
 
-    // Keep workflow alive until quiz completes
-    await new Promise(() => { }); 
+    // Keep the workflow running until either completed OR shouldEnd
+    while (!completed && !shouldEnd) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    // Workflow ends when either condition is met
 }
