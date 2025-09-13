@@ -24,8 +24,6 @@ function QuizBoard() {
 
     // Initialize theme
     const [quizBoardTheme] = useState(() => initializeQuizBoardTheme(topicId))
-    const [themeClasses] = useState(() => getQuizBoardClasses(topicId))
-    const [fullTheme] = useState(() => getThemeByTopicId(topicId))
 
     // Quiz state
     const [questions, setQuestions] = useState([])
@@ -144,7 +142,9 @@ function QuizBoard() {
         setIsAnswering(true)
         setIsTimerActive(false) // Pause timer when answer is selected
 
-        const isCorrect = question.options[answerIndex].id === question.correctAnswer
+        
+
+        // const isCorrect = question.options[answerIndex].id === question.correctAnswer
 
         if (isCorrect) {
             setScore(prev => prev + 1)
@@ -237,21 +237,6 @@ function QuizBoard() {
         animate: { opacity: 1, y: 0 },
         transition: { duration: 0.3, delay: index * 0.1 }
     })
-
-    // Button variant based on state
-    const getButtonVariant = (index) => {
-        if (!showResult) return "outline"
-
-        const option = question.options[index]
-        const isSelected = selectedAnswer === index
-        const isCorrect = option.id === question.correctAnswer
-
-        if (isSelected && isCorrect) return "default" // Green for correct
-        if (isSelected && !isCorrect) return "destructive" // Red for wrong
-        if (isCorrect) return "default" // Highlight correct answer
-
-        return "ghost" // Fade other options
-    }
 
     // Loading state
     if (questions.length === 0) {

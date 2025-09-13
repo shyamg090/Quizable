@@ -1,108 +1,75 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 
-const TimerCircle = ({ duration, onTimeUp, isActive, onTimeChange }) => {
-  const [timeLeft, setTimeLeft] = useState(duration);
-  const circumference = 2 * Math.PI * 45; // radius = 45
+const CountdownCircle = forwardRef(({ startTime = 15, onTimeUp }, ref) => {
+  const [time, setTime] = useState(startTime);
+  const timerRef = useRef(null);
 
-  // Debug logging
-  // console.log('TimerCircle render:', { duration, isActive, timeLeft });
+  const radius = 70;
+  const circumference = 2 * Math.PI * radius;
+  const progress = ((startTime - time) / startTime) * circumference;
 
-  useEffect(() => {
-    // console.log('TimerCircle useEffect triggered:', { isActive, duration });
-    
-    if (!isActive) {
-      console.log('Timer is not active, returning early');
-      return;
+  // Expose reset function to parent via ref
+  useImperativeHandle(ref, () => ({
+    resetTimer: () => {
+      clearInterval(timerRef.current);
+      setTime(startTime);
+      startCountdown();
     }
-    
-    // Always reset timer to full duration when timer is (re)activated
-    // console.log('Setting timer to duration:', duration);
-    setTimeLeft(duration);
-    if (onTimeChange) {
-      onTimeChange(duration);
-    }
-    
-    const timer = setInterval(() => {
-      // console.log('Timer interval triggered');
-      setTimeLeft((prev) => {
-        const newTimeLeft = prev <= 1 ? 0 : prev - 1;
-        // console.log('Timer tick:', { prev, newTimeLeft });
-        
-        if (onTimeChange) {
-          onTimeChange(newTimeLeft);
-        }
-        
+  }));
+
+  const startCountdown = () => {
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setTime(prev => {
         if (prev <= 1) {
-          // console.log('Time up!');
+          clearInterval(timerRef.current);
           onTimeUp();
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-    
-    // console.log('Timer interval created:', timer);
-    
-    return () => {
-      console.log('Clearing timer interval');
-      clearInterval(timer);
-    };
-  }, [isActive, duration]); // Removed onTimeUp and onTimeChange from dependencies
+  };
 
-  const progress = (timeLeft / duration) * circumference;
-  const isUrgent = timeLeft <= 5;
+  // Start countdown on mount
+  useEffect(() => {
+    startCountdown();
+    return () => clearInterval(timerRef.current);
+  }, [startTime]);
+
+  // Stop countdown when answer is selected
+  useEffect(() => {
+    return () => clearInterval(timerRef.current);
+  }, []);
 
   return (
-    <div className="relative w-24 h-24">
-      <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
-        {/* Background circle */}
+    <div className="relative w-32 h-32">
+      <svg className="w-32 h-32 transform -rotate-90">
         <circle
-          cx="50"
-          cy="50"
-          r="45"
-          stroke="currentColor"
-          strokeWidth="8"
+          cx="80"
+          cy="80"
+          r={radius}
+          stroke="lightgray"
+          strokeWidth="10"
           fill="transparent"
-          className="text-muted-foreground/20"
         />
-        {/* Progress circle */}
-        <motion.circle
-          cx="50"
-          cy="50"
-          r="45"
-          stroke="currentColor"
-          strokeWidth="8"
+        <circle
+          cx="80"
+          cy="80"
+          r={radius}
+          stroke="blue"
+          strokeWidth="10"
           fill="transparent"
           strokeDasharray={circumference}
           strokeDashoffset={circumference - progress}
-          strokeLinecap="round"
-          className={isUrgent ? 'text-destructive' : 'text-primary'}
-          animate={{
-            strokeDashoffset: circumference - progress,
-          }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
+          style={{ transition: "stroke-dashoffset 1s linear" }}
         />
       </svg>
-
-      {/* Timer text */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <motion.span 
-          className={`text-xl font-bold ${isUrgent ? 'text-destructive' : 'text-primary'}`}
-          animate={{ 
-            scale: isUrgent ? [1, 1.1, 1] : 1,
-            color: isUrgent ? "hsl(var(--destructive))" : "hsl(var(--primary))"
-          }}
-          transition={{ 
-            scale: { duration: 0.5, repeat: isUrgent ? Infinity : 0 },
-            color: { duration: 0.3 }
-          }}
-        >
-          {timeLeft}
-        </motion.span>
+      <div className="absolute inset-0 flex items-center justify-center text-xl font-bold">
+        {time}s
       </div>
     </div>
   );
-};
+});
 
-export default TimerCircle;
+export default CountdownCircle;

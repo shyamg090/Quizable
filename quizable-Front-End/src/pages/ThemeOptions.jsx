@@ -2,35 +2,82 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { topics } from '../data/topics';
 import axios from "axios";
-import v7 from 'uuid';
+import { useEffect, useState } from 'react';
 
 function ThemeOptions() {
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    useEffect(async () => {
-        const token = await axios.get('http://localhost:3000/api/token'); // Updated to send unique_id directly
-        localStorage.setItem("access_token", token.data.access_token);
-    }, [])
-
-    localStorage.setItem('selectedTopic', null);
-    const handleTopicSelect = async (selectedTopic) => {
-        
-        localStorage.setItem('selectedTopic', selectedTopic?.id);
-        const accessToken = localStorage.getItem("access_token");
-
-        const startQuiz = await axios.post(
-            `http://localhost:3000/api/start`,
-            {
-                topic: selectedTopic?.id
-            }, // request body (empty in your case)
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
+    useEffect(() => {
+        const fetchToken = async () => {
+            try {
+                const token = await axios.get('http://localhost:3000/api/token');
+                localStorage.setItem("access_token", token.data.access_token);
+                localStorage.setItem('selectedTopic', null);
+                setIsLoading(false);
+            } catch (error) {
+                console.error('Error fetching token:', error);
+                setError('Failed to initialize. Please try again.');
+                setIsLoading(false);
             }
-        );
-        navigate('/landing');
+        };
+
+        fetchToken();
+    }, []);
+
+    const handleTopicSelect = async (selectedTopic) => {
+        try {
+            localStorage.setItem('selectedTopic', selectedTopic?.id);
+            const accessToken = localStorage.getItem("access_token");
+
+            if (!accessToken) {
+                setError('Authentication token not found. Please refresh the page.');
+                return;
+            }
+
+            const startQuiz = await axios.post(
+                `http://localhost:3000/api/start`,
+                {
+                    topic: selectedTopic?.id
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+            localStorage.setItem('workflowId', startQuiz.data.workflowId);
+            navigate('/landing');
+        } catch (error) {
+            console.error('Error starting quiz:', error);
+            setError('Failed to start quiz. Please try again.');
+        }
     };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-zinc-900 flex items-center justify-center">
+                <div className="text-white text-xl">Loading...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-zinc-900 flex items-center justify-center">
+                <div className="text-red-400 text-xl text-center">
+                    <p>{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-zinc-900 flex items-center justify-center px-4 py-8">

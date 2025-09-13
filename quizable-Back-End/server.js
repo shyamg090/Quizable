@@ -1,100 +1,100 @@
 import express from 'express';
+import cors from 'cors';
 import { client } from './client/temporalClient.js';
 import bcrypt from 'bcrypt';
 import { uuid4 } from '@temporalio/workflow';
 import auth from './middleware/authMiddleware.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(cors({
+    origin: ["http://localhost:5173"],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
+// Token endpoint
 app.get("/api/token", async (req, res) => {
-    const hashedId = bcrypt.hash(process.env.FRONT_END_PRIVATE_KEY, 10);
-    res.status(200).send({ access_token: hashedId });
+    const hashedId = await bcrypt.hash(process.env.FRONT_END_PRIVATE_KEY, 10);
+    res.status(200).json({ access_token: hashedId });
 });
 
-app.post("/start", auth, async (req, res) => {
+// Start quiz workflow
+app.post("/api/start", auth, async (req, res) => {
     const { topic } = req.body;
 
     const handle = await client.workflow.start("startGameWorkflow", {
         args: [topic],
         taskQueue: "quizable-task-queue",
-        workflowId: uuid4(), // Unique workflow ID
+        workflowId: uuid4(),
     });
 
     res.status(200).send({ message: "Workflow started", workflowId: handle.workflowId });
-
-    await new Promise(() => { }); // keep alive important 
 });
 
-app.get("/question/:workflowId", auth, async (req, res) => {
+// Get current question
+app.post("/question/:workflowId", auth, async (req, res) => {
     try {
         const { workflowId } = req.params;
-        const getHandle = client.workflow.getHandle(workflowId);
+        const handle = client.workflow.getHandle(workflowId);
 
-        const currentQuestion = await getHandle.query("getCurrentQuestion");
-        const quizStatus = await getHandle.query("getQuizStatus");
-
-        res.status(200).send({
-            workflowId,
-            currentQuestion,
-            quizStatus
-        });
-    } catch (error) {
-        console.error('Error getting current question:', error);
-        res.status(500).send({ error: "Failed to get current question" });
+        const currentQuestion = await handle.query("getCurrentQuestion");
+        const quizStatus = await handle.query("getQuizStatus");
+        console.log(currentQuestion, quizStatus);
+        res.status(200).json({ currentQuestion, quizStatus });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to get question" });
     }
 });
 
-app.get("/status/:workflowId", auth, async (req, res) => {
-    try {
-        const { workflowId } = req.params;
-        const getHandle = client.workflow.getHandle(workflowId);
-
-        const quizStatus = await getHandle.query("getQuizStatus");
-
-        res.status(200).send({
-            workflowId,
-            status: quizStatus
-        });
-    } catch (error) {
-        console.error('Error getting quiz status:', error);
-        res.status(500).send({ error: "Failed to get quiz status" });
-    }
-});
-
+// Submit answer
 app.post("/answers/:workflowId", auth, async (req, res) => {
     try {
         const { workflowId } = req.params;
         const { answer, questionId } = req.body;
 
-        const getHandle = client.workflow.getHandle(workflowId);
+        const handle = client.workflow.getHandle(workflowId);
 
-        // Send the answer to the workflow
-        await getHandle.signal("answer", { answer, questionId });
+        // Send answer to workflow
+        await handle.signal("answer", { answer, questionId });
 
-        // Give the workflow a moment to process
+        // Small delay to ensure workflow state updated
         await new Promise(resolve => setTimeout(resolve, 100));
 
-        // Get the updated state
-        const currentQuestion = await getHandle.query("getCurrentQuestion");
-        const quizStatus = await getHandle.query("getQuizStatus");
-
-        console.log('User answered:', answer, 'for question:', questionId);
-        console.log('Quiz status:', quizStatus);
-
-        res.status(200).send({
-            message: "Answer processed",
-            currentQuestion,
-            quizStatus,
-            workflowId: workflowId
-        });
-    } catch (error) {
-        console.error('Error processing answer:', error);
-        res.status(500).send({ error: "Failed to process answer" });
+        const currentQuestion = await handle.query("getCurrentQuestion");
+        const quizStatus = await handle.query("getQuizStatus");
+        console.log(currentQuestion, quizStatus);
+        res.status(200).json({ message: "Answer processed", currentQuestion, quizStatus });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to process answer" });
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// Get quiz history only
+app.get("/history/:workflowId", auth, async (req, res) => {
+    try {
+        const { workflowId } = req.params;
+        const handle = client.workflow.getHandle(workflowId);
+
+        const quizStatus = await handle.query("getQuizStatus");
+
+        // ✅ Only return the history array
+        const history = quizStatus.history || [];
+
+        res.status(200).json({ history });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to get quiz history" });
+    }
 });
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

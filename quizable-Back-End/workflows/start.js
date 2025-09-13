@@ -1,131 +1,104 @@
 import { defineSignal, defineQuery, setHandler, proxyActivities } from '@temporalio/workflow';
 
 export const answer = defineSignal('answer');
-export const addData = defineSignal('addData');
 
-// export const getanswerQuery = defineQuery('getAnswer');
-export const getChatquery = defineQuery('getChat');
-export const getChatHistoryQuery = defineQuery('getChatHistory');
 export const getCurrentQuestionQuery = defineQuery('getCurrentQuestion');
 export const getQuizStatusQuery = defineQuery('getQuizStatus');
 
-const { checkAnswer, loadQuestions } = proxyActivities({
-    startToCloseTimeout: '1 minute',
-});
+const { checkAnswer, loadQuestions } = proxyActivities({ startToCloseTimeout: '1 minute' });
 
 export async function startGameWorkflow(topic) {
-    // Load questions for the specified topic
     const questions = await loadQuestions(topic);
 
-    let currentQuestionIndex = 0;
-    let questionsHistory = [];
+    let currentIndex = 0;
+    let history = [];
     let score = 0;
-    let quizCompleted = false;
-    let currentQuestion = null;
+    let completed = false;
 
-    // Fisher-Yates shuffle algorithm for proper randomization
-    function shuffleArray(array) {
-        const shuffled = [...array]; // Create a copy to avoid mutating original
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    const shuffled = questions.sort(() => 0.5 - Math.random()).slice(0, 10);
+    let currentQuestion = shuffled[currentIndex];
+
+    // ✅ Push the first question in {question: {...}} format
+    history.push({
+        question: {
+            number: currentIndex + 1,
+            data: currentQuestion,
+            timestamp: new Date().toISOString(),
         }
-        return shuffled;
-    }
-
-    // Select 10 random questions from the topic using proper shuffle
-    const shuffledQuestions = shuffleArray(questions).slice(0, 10);
-
-    // Set the first question
-    currentQuestion = shuffledQuestions[currentQuestionIndex];
-
-    // Add initial question to history
-    questionsHistory.push({
-        questionNumber: 1,
-        question: currentQuestion,
-        timestamp: new Date().toISOString()
     });
 
-    // Handler for answer signal
-    setHandler(answer, async (data) => {
-        if (quizCompleted) return;
+    setHandler(answer, async ({ answer: userAnswer, questionId }) => {
+        if (completed) return;
 
-        const userAnswer = data.answer;
-        const questionId = data.questionId;
-
-        // Validate the answer
         const isCorrect = await checkAnswer(currentQuestion, userAnswer);
+        if (isCorrect) score++;
 
-        if (isCorrect) {
-            score++;
-        }
-
-        // Add user's answer to history
-        questionsHistory.push({
-            questionNumber: currentQuestionIndex + 1,
-            questionId: questionId,
-            userAnswer: userAnswer,
-            isCorrect: isCorrect,
-            timestamp: new Date().toISOString()
+        // ✅ Store the answer in {answer: {...}} format
+        history.push({
+            answer: {
+                questionNumber: currentIndex + 1,
+                questionId,
+                userAnswer,
+                isCorrect,
+                timestamp: new Date().toISOString(),
+            }
         });
 
-        // Move to next question
-        currentQuestionIndex++;
-
-        if (currentQuestionIndex >= 10) {
-            // Quiz completed
-            quizCompleted = true;
+        currentIndex++;
+        if (currentIndex >= shuffled.length) {
+            completed = true;
             currentQuestion = null;
 
-            questionsHistory.push({
-                type: 'quiz_completed',
-                finalScore: score,
-                totalQuestions: 10,
-                percentage: (score / 10) * 100,
-                timestamp: new Date().toISOString()
+            // ✅ Add a final "quiz_completed" marker
+            history.push({
+                answer: {
+                    type: 'quiz_completed',
+                    finalScore: score,
+                    totalQuestions: shuffled.length,
+                    timestamp: new Date().toISOString(),
+                }
             });
         } else {
-            // Set next question
-            currentQuestion = shuffledQuestions[currentQuestionIndex];
+            currentQuestion = shuffled[currentIndex];
 
-            questionsHistory.push({
-                questionNumber: currentQuestionIndex + 1,
-                question: currentQuestion,
-                timestamp: new Date().toISOString()
+            // ✅ Store next question again in {question: {...}} format
+            history.push({
+                question: {
+                    number: currentIndex + 1,
+                    data: currentQuestion,
+                    timestamp: new Date().toISOString(),
+                }
             });
         }
     });
 
-    // Query handlers
     setHandler(getCurrentQuestionQuery, () => {
-        if (quizCompleted) {
+        if (completed) {
             return {
                 completed: true,
                 finalScore: score,
-                totalQuestions: 10,
-                percentage: (score / 10) * 100
+                totalQuestions: shuffled.length,
+                history
             };
         }
         return {
             completed: false,
-            questionNumber: currentQuestionIndex + 1,
-            totalQuestions: 10,
-            question: currentQuestion
+            questionNumber: currentIndex + 1,
+            totalQuestions: shuffled.length,
+            question: currentQuestion,
+            history
         };
     });
 
     setHandler(getQuizStatusQuery, () => ({
-        currentQuestionNumber: currentQuestionIndex + 1,
-        totalQuestions: 10,
-        score: score,
-        completed: quizCompleted,
-        topic: topic
+        currentQuestionNumber: currentIndex + 1,
+        totalQuestions: shuffled.length,
+        score,
+        completed,
+        topic,
+        history
     }));
 
-    setHandler(getChatHistoryQuery, () => questionsHistory);
-    setHandler(getChatquery, () => currentQuestion);
-
-    if (quizCompleted) {
-        await new Promise(() => { }); // keep alive important
-    }
+    // Keep workflow alive until quiz completes
+    await new Promise(() => { }); 
 }

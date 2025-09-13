@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import ThemeOptions from './pages/ThemeOptions';
 import Landing from './pages/Landing';
-import QuizBoard from './pages/QuizBoard';
+import QuizBoard from './pages/QuizBoard2';
 import Results from './pages/Results';
 import NotFound from './pages/NotFound';
 

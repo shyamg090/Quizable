@@ -1,3 +1,5 @@
+import bcrypt from 'bcrypt';
+
 const auth = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];

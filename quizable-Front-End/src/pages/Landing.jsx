@@ -34,7 +34,7 @@ function Landing() {
 
     const handleStartGame = () => {
         if (!playerName.trim()) return;
-        
+
         // Create game data structure for QuizBoard
         const gameData = {
             playerName: playerName.trim(),
@@ -52,11 +52,11 @@ function Landing() {
                 totalQuestions: 10
             }
         };
-        
+
         // Save to localStorage for persistence
         localStorage.setItem('currentGame', JSON.stringify(gameData));
         localStorage.setItem('startTime', 'true');
-        
+
         // Navigate to QuizBoard with game data
         navigate('/quizboard', { state: gameData });
     };
