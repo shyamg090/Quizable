@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   temporal:
     image: temporalio/auto-setup:latest
@@ -12,8 +10,8 @@ services:
       POSTGRES_PWD: shyam # your external DB password
       POSTGRES_SEEDS: host.docker.internal   # host of your external Postgres - add extenal host name fot this is used 
       DBNAME: temporal-quizable-postgresql-local        # name of the database Temporal should use
-            # Optional SSL mode (required for Neon)
-      # POSTGRES_TLS: true
+    # Optional SSL mode (required for Neon)
+    # POSTGRES_TLS: true
     ports:
       - "7233:7233"
     networks:
@@ -26,6 +24,13 @@ services:
       - temporal
     environment:
       TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_AUTH_ENABLED: "true"
+      TEMPORAL_AUTH_PROVIDER_URL: ${TEMPORAL_AUTH_PROVIDER_URL}
+      TEMPORAL_AUTH_CLIENT_ID: ${TEMPORAL_AUTH_CLIENT_ID}
+      TEMPORAL_AUTH_CLIENT_SECRET: ${TEMPORAL_AUTH_CLIENT_SECRET}
+      TEMPORAL_AUTH_CALLBACK_URL: ${TEMPORAL_AUTH_CALLBACK_URL}
+      TEMPORAL_AUTH_SCOPES: ${TEMPORAL_AUTH_SCOPES}
+
     ports:
       - "8080:8080"
     networks:
@@ -47,4 +52,4 @@ services:
 networks:
   temporal-net:
     driver: bridge
- 
+      
